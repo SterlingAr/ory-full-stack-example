@@ -24,6 +24,8 @@ services:
   hydra-migrate:
     image: oryd/hydra:${HYDRA_VERSION}
     container_name: hydra-migrate-v1
+    depends_on:
+      - postgres
     environment:
     - DATABASE_URL=${DATABASE_URL}
     networks:
@@ -34,7 +36,7 @@ services:
 
   hydra:
     image: oryd/hydra:${HYDRA_VERSION}
-    container_name: hydra
+    container_name: hydra-v1
     depends_on:
     - hydra-migrate
     environment:
