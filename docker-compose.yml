@@ -12,12 +12,13 @@ services:
   postgres:
     image: postgres:${POSTGRES_VERSION}
     container_name: postgres
+    hostname: postgres
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-    - ${DATA_PATH_HOST}/postgres:/var/lib/mysql
+    - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
     networks:
       - hydra
   #Do migration before starting the server
@@ -37,8 +38,9 @@ services:
   hydra:
     image: oryd/hydra:${HYDRA_VERSION}
     container_name: hydra-v1
-    depends_on:
-    - hydra-migrate
+    hostname: ${HYDRA_HOST}
+#    depends_on:
+#    - hydra-migrate
     environment:
       - SYSTEM_SECRET=${SYSTEM_SECRET}
       - DATABASE_URL=${DATABASE_URL}
