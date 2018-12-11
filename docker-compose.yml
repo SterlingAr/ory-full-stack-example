@@ -3,6 +3,9 @@ version: '3'
 networks:
   hydra:
     driver: bridge
+  stack:
+    external:
+      name: daassuitedockerdevelopment_stack
 
 volumes:
   postgres:
@@ -49,6 +52,7 @@ services:
       - OAUTH2_LOGIN_URL=${OAUTH2_LOGIN_URL}
     networks:
       - hydra
+      - stack
     ports:
       - "9000:4444"
       - "9001:4445"
