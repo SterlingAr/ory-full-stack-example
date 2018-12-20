@@ -1,24 +1,17 @@
-# ORY Hydra implementation of OAUTH2 + OpenID Connect 1.0
+# ORY STACK
 ![](https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/OpenID_logo_2.svg/1200px-OpenID_logo_2.svg.png)
 
 
 ## Local install 
 
-Before running the containers, make sure the following ports are open: 9000, 9001, 9010, 9020
+This will launch Hydra, Keto and Oathkeeper with minimal configuration:
+
 
     $ docker-compose up -d
-    
-    
-Check its running correctly
-
-    $ docker logs hydra
-    
-    time="2018-12-07T12:54:37Z" level=info msg="Setting up http server on :4444"
-    time="2018-12-07T12:54:37Z" level=warning msg="HTTPS disabled. Never do this in production."
 
 
-
-## Performing the OAuth 2.0 Client Credentials Flow
+##Hydra
+#### Performing the OAuth 2.0 Client Credentials Flow
     
 Create an OAuth 2.0 Client
     
@@ -31,17 +24,17 @@ Create an OAuth 2.0 Client
           
 Issue an access token
 
-    $ docker container exec -it hydra-v1 hydra token client \
+    $ docker container exec -it hydra hydra token client \
         --client-id some-consumer \
         --client-secret some-secret \
-        --endpoint http://hydra-v1:4444
+        --endpoint http://hydra:4444
           
 Validate the access token
        
-    $ docker container exec -it hydra-v1 hydra token introspect \
+    $ docker container exec -it hydra hydra token introspect \
          --client-id some-consumer \
          --client-secret some-secret \
-         --endpoint http://hydra-v1:4445 \
+         --endpoint http://hydra:4445 \
          >INSERT-TOKEN-HERE<
          
         Expected output: 
@@ -57,5 +50,9 @@ Validate the access token
 
 
            
-           
-       
+##Oathkeeper
+    //TODO
+    
+##KETO
+    //TODO
+         

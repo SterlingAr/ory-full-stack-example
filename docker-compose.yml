@@ -1,64 +1,153 @@
 version: '3'
 
 networks:
-  hydra:
+  ory_stack:
     driver: bridge
   stack:
     external:
       name: daassuitedockerdevelopment_stack
 
 volumes:
-  postgres:
+  hydra_db:
+    driver: local
+  oathkeeper_db:
+    driver: local
+  keto_db:
     driver: local
 
 services:
-  postgres:
+  hydra_postgres:
     image: postgres:${POSTGRES_VERSION}
-    container_name: postgres
-    hostname: postgres
+    container_name: hydra-db
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${HYDRA_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${HYDRA_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${HYDRA_POSTGRES_DB}
     volumes:
-    - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
+    - ${DATA_PATH_HOST}/hydra_db:/var/lib/postgresql/data
     networks:
-      - hydra
-  #Do migration before starting the server
-  hydra-migrate:
+      - ory_stack
+
+  oathkeeper_postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: oathkeeper-db
+    environment:
+      - POSTGRES_USER=${OATHKEEPER_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${OATHKEEPER_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${OATHKEEPER_POSTGRES_DB}
+    volumes:
+      - ${DATA_PATH_HOST}/oathkeeper_db:/var/lib/postgresql/data
+    networks:
+      - ory_stack
+
+  keto_postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: keto-db
+    environment:
+      - POSTGRES_USER=${KETO_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${KETO_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${KETO_POSTGRES_DB}
+    volumes:
+      - ${DATA_PATH_HOST}/keto_db:/var/lib/postgresql/data
+    networks:
+      - ory_stack
+
+  hydra_migrate:
     image: oryd/hydra:${HYDRA_VERSION}
     container_name: hydra-migrate-v1
     depends_on:
-      - postgres
-    environment:
-    - DATABASE_URL=${DATABASE_URL}
+      - hydra_postgres
     networks:
-    - hydra
-    entrypoint: hydra
-    command: "migrate sql $DATABASE_URL"
+    - ory_stack
+    command: "migrate sql $HYDRA_DATABASE_URL"
     tty: false
+
+  oathkeeper_migrate:
+    image: oryd/oathkeeper:${OATHKEEPER_VERSION}
+    container_name: oathkeeper-migrate
+    depends_on:
+      - oathkeeper_postgres
+    networks:
+      - ory_stack
+    command: "migrate sql $OATHKEEPER_DATABASE_URL"
+    tty: false
+
+  keto_migrate:
+    image: oryd/keto:${KETO_VERSION}
+    container_name: keto-migrate
+    depends_on:
+      - keto_postgres
+    networks:
+      - ory_stack
+    command: "migrate sql $KETO_DATABASE_URL"
+    tty: false
+
+  oathkeeper_api:
+    image: oryd/oathkeeper:${OATHKEEPER_VERSION}
+    container_name: oathkeeper-api
+    depends_on:
+      - oathkeeper_migrate
+    environment:
+      - DATABASE_URL=${OATHKEEPER_DATABASE_URL}
+      - PORT=4456
+      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=${CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET}
+    networks:
+      - ory_stack
+    entrypoint: oathkeeper
+    ports:
+      - "4456:4456"
+    command: "serve api"
+
+  oathkeeper_proxy:
+    image: oryd/oathkeeper:${OATHKEEPER_VERSION}
+    container_name: oathkeeper-proxy
+    depends_on:
+      - oathkeeper_api
+    environment:
+      - OATHKEEPER_API_URL=http://oathkeeper-api:4456
+      - PORT=4455
+      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=${CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET}
+    networks:
+      - ory_stack
+      - stack
+    ports:
+      - "4455:4455"
+    entrypoint: oathkeeper
+    command: "serve proxy"
+
+  keto:
+    image: oryd/keto:${KETO_VERSION}
+    container_name: keto
+    depends_on:
+      - keto_migrate
+    networks:
+      - ory_stack
+    environment:
+      - DATABASE_URL=${KETO_DATABASE_URL}
+    ports:
+      - "4466:4466"
+    entrypoint: keto
+    command: "serve"
 
   hydra:
     image: oryd/hydra:${HYDRA_VERSION}
-    container_name: hydra-v1
-    hostname: ${HYDRA_HOST}
-#    depends_on:
-#    - hydra-migrate
+    container_name: hydra
+    depends_on:
+    - hydra_migrate
     environment:
+      - DATABASE_URL=${HYDRA_DATABASE_URL}
       - SYSTEM_SECRET=${SYSTEM_SECRET}
-      - DATABASE_URL=${DATABASE_URL}
       - OAUTH2_ISSUER_URL=${OAUTH2_ISSUER_URL}
       - OAUTH2_CONSENT_URL=${OAUTH2_CONSENT_URL}
       - OAUTH2_LOGIN_URL=${OAUTH2_LOGIN_URL}
     networks:
-      - hydra
+      - ory_stack
       - stack
     ports:
       - "9000:4444"
       - "9001:4445"
     entrypoint: hydra
     command: "serve all --dangerous-force-http"
-
 
 
 
