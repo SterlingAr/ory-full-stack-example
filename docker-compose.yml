@@ -147,6 +147,7 @@ services:
       - OAUTH2_ISSUER_URL=${OAUTH2_ISSUER_URL}
       - OAUTH2_CONSENT_URL=${OAUTH2_CONSENT_URL}
       - OAUTH2_LOGIN_URL=${OAUTH2_LOGIN_URL}
+      - CORS_ENABLED=${CORS_ENABLED}
     networks:
       - ory_stack
       - stack
