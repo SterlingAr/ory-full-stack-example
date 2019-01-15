@@ -87,10 +87,12 @@ services:
     container_name: oathkeeper-api
     depends_on:
       - oathkeeper_migrate
+      - keto
     environment:
       - DATABASE_URL=${OATHKEEPER_DATABASE_URL}
+      - AUTHORIZER_KETO_URL=${AUTHORIZER_KETO_URL}
       - PORT=4456
-      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=$AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
+      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=${AUTHENTICATOR_OAUTH2_INTROSPECTION_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=${CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=${CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM}
 #      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=${CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET}
@@ -109,6 +111,7 @@ services:
       - oathkeeper_api
     environment:
       - OATHKEEPER_API_URL=http://oathkeeper-api:4456
+      - AUTHORIZER_KETO_URL=${AUTHORIZER_KETO_URL}
       - PORT=4455
       - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=${AUTHENTICATOR_OAUTH2_INTROSPECTION_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=${CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL}
@@ -127,10 +130,10 @@ services:
     container_name: keto
     depends_on:
       - keto_migrate
-    networks:
-      - ory_stack
     environment:
       - DATABASE_URL=${KETO_DATABASE_URL}
+    networks:
+      - ory_stack
     ports:
       - "4466:4466"
     entrypoint: keto
