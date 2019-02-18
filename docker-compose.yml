@@ -134,6 +134,7 @@ services:
       - DATABASE_URL=${KETO_DATABASE_URL}
     networks:
       - ory_stack
+      - stack
     ports:
       - "4466:4466"
     entrypoint: keto
