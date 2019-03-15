@@ -1,0 +1,160 @@
+[
+  {
+    "id": "${ORGANIZATION}-create-permission-${ENVIROMENT}",
+    "description": "Create a permission for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/permissions",
+      "methods": [
+        "POST"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.permissions"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:permissions:create",
+        "required_resource": "organizations:${ORGANIZATION}:permissions"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-get-permission-${ENVIROMENT}",
+    "description": "Get one permission for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/permissions/<[0-9]+>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "${ORGANIZATION}.permissions"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:permissions:$1:read",
+        "required_resource": "organizations:${ORGANIZATION}:permissions:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-get-permissions-${ENVIROMENT}",
+    "description": "Get permission collection for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/permissions<(\\?page=.+)?>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.permissions"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:permissions:read",
+        "required_resource": "organizations:${ORGANIZATION}:permissions"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-update-permission-${ENVIROMENT}",
+    "description": "Update a permission for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/permissions/<[0-9]+>",
+      "methods": [
+        "PUT",
+        "PATCH"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.permissions"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:permissions:$1:update",
+        "required_resource": "organizations:${ORGANIZATION}:permissions:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-delete-permission-${ENVIROMENT}",
+    "description": "Delete a permission for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/permissions/<[0-9]+>",
+      "methods": [
+        "DELETE"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.permissions"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:permissions:$1:delete",
+        "required_resource": "organizations:${ORGANIZATION}:permissions:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

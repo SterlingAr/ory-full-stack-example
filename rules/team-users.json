@@ -1,0 +1,64 @@
+[
+  {
+    "id": "${ORGANIZATION}-get-team-users-${ENVIROMENT}",
+    "description": "Get userss belonging to a team for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/teams/<[0-9]+>/users<(\\?page=.+)?>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.teams.users"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:teams:users:read",
+        "required_resource": "organizations:${ORGANIZATION}:teams:$1:users"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-update-team-users-${ENVIROMENT}",
+    "description": "Assign users to a team for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/teams/<[0-9]+>/users",
+      "methods": [
+        "PUT"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.teams.users"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:teams:$1:users:update",
+        "required_resource": "organizations:${ORGANIZATION}:teams:$1:users"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

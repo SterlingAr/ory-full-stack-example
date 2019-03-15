@@ -1,0 +1,64 @@
+[
+  {
+    "id": "${ORGANIZATION}-get-user-roles-${ENVIROMENT}",
+    "description": "Get user roles collection for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/users/<[0-9]+>/roles<(\\?page=.+)?>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.users.roles"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:users:$1:roles:read",
+        "required_resource": "organizations:${ORGANIZATION}:users:$1:roles"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-update-user-roles-${ENVIROMENT}",
+    "description": "Assign a role to a user for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/users/<[0-9]+>/roles",
+      "methods": [
+        "PUT"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.users.roles"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:users:$1:roles:update",
+        "required_resource": "organizations:${ORGANIZATION}:users:$1:roles"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

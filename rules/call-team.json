@@ -1,0 +1,68 @@
+[
+  {
+    "id": "${ORGANIZATION}-update-call-team-${ENVIROMENT}",
+    "description": "Update a Call's Team for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/calls/<[0-9]+>/team",
+      "methods": [
+        "PUT"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "${ORGANIZATION}.calls"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:calls:$1:team:update",
+        "required_resource": "organizations:${ORGANIZATION}:calls:$1:team"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-delete-call-team-${ENVIROMENT}",
+    "description": "Delete a Call's Team for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/calls/<[0-9]+>/team",
+      "methods": [
+        "DELETE"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "${ORGANIZATION}.calls"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:calls:$1:team:delete",
+        "required_resource": "organizations:${ORGANIZATION}:calls:$1:team"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "${ORGANIZATION}-get-token",
+    "upstream": {
+      "url": "http://nginx:8090"
+    },
+    "match": {
+      "url": "http://capability.twilio/token",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "${ORGANIZATION}.twilio.voice"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:twilio:capability:token",
+        "required_resource": "organizations:${ORGANIZATION}:twilio:capability:token"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

@@ -14,6 +14,8 @@ volumes:
     driver: local
   keto_db:
     driver: local
+  rules:
+    driver: local
 
 services:
   hydra_postgres:
@@ -95,7 +97,6 @@ services:
       - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=${AUTHENTICATOR_OAUTH2_INTROSPECTION_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=${CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=${CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM}
-#      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=${CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET}
     networks:
       - ory_stack
     entrypoint: oathkeeper
@@ -116,7 +117,12 @@ services:
       - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=${AUTHENTICATOR_OAUTH2_INTROSPECTION_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=${CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL}
       - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=${CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM}
-#      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=${CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET}
+      - CORS_ENABLED=${CORS_ENABLED}
+      - CORS_DEBUG=${CORS_DEBUG}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      - CORS_ALLOWED_METHODS=${CORS_ALLOWED_METHODS}
+      - CORS_ALLOWED_CREDENTIALS=${CORS_ALLOWED_CREDENTIALS}
+      - CORS_ALLOWED_HEADERS=${CORS_ALLOWED_HEADERS}
     networks:
       - ory_stack
       - stack
@@ -166,5 +172,24 @@ services:
     entrypoint: hydra
     command: "serve all --dangerous-force-http"
 
-
-
+  ory-config-utils:
+    image: roiupagency/ory-config-utils
+    depends_on:
+      - oathkeeper_api
+    networks:
+      - ory_stack
+      - stack
+    environment:
+      - ENVIROMENT=dev
+      - ORGANIZATION=roiup
+      - OATHKEEPER_PROXY_URL=http://localhost:4455
+      - RESOURCE_SERVER=http://nginx
+    volumes:
+      - ${OATHKEEPER_RULES_PATH}:/rules
+    command: >
+      /bin/bash -c "rm -rf /rules-changed && mkdir rules-changed &&
+      cp -rf /rules/*.json /rules-changed &&
+      chmod +x envsubstfiles.sh &&
+      chmod +x oathkeeper.sh &&
+      /envsubstfiles.sh '/rules-changed/*.json' &&
+      /oathkeeper.sh 'http://oathkeeper-api:4456' '/rules-changed/'"

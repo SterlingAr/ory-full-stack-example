@@ -1,0 +1,160 @@
+[
+  {
+    "id": "${ORGANIZATION}-create-role-${ENVIROMENT}",
+    "description": "Create a role for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/roles",
+      "methods": [
+        "POST"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.roles"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:roles:create",
+        "required_resource": "organizations:${ORGANIZATION}:roles"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-get-role-${ENVIROMENT}",
+    "description": "Get one role for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/roles/<[0-9]+>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "${ORGANIZATION}.roles"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:roles:$1:read",
+        "required_resource": "organizations:${ORGANIZATION}:roles:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-get-roles-${ENVIROMENT}",
+    "description": "Get role collection for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/roles<(\\?page=.+)?>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.roles"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:roles:read",
+        "required_resource": "organizations:${ORGANIZATION}:roles"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-update-role-${ENVIROMENT}",
+    "description": "Update a role for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/roles/<[0-9]+>",
+      "methods": [
+        "PUT",
+        "PATCH"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.roles"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:roles:$1:update",
+        "required_resource": "organizations:${ORGANIZATION}:roles:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-delete-role-${ENVIROMENT}",
+    "description": "Delete a role for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/roles/<[0-9]+>",
+      "methods": [
+        "DELETE"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.roles"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:roles:$1:delete",
+        "required_resource": "organizations:${ORGANIZATION}:roles:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "id": "${ORGANIZATION}-get-team-calls-${ENVIROMENT}",
+    "description": "Get callss belonging to a team for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/teams/<[0-9]+>/calls<(\\?page=.+)?>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.teams.calls"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:teams:$1:calls:read",
+        "required_resource": "organizations:${ORGANIZATION}:teams:$1:calls"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
+    "id": "${ORGANIZATION}-update-team-calls-${ENVIROMENT}",
+    "description": "Assign calls to a team for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/teams/<[0-9]+>/calls",
+      "methods": [
+        "PUT",
+        "PATCH"
+      ]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "${ORGANIZATION}.teams.calls"
+        ]
+      }
+    }],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:teams:$1:calls:update",
+        "required_resource": "organizations:${ORGANIZATION}:teams:$1:calls"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]
