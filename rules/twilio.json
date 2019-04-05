@@ -2,10 +2,10 @@
   {
     "id": "${ORGANIZATION}-get-token",
     "upstream": {
-      "url": "http://nginx:8090"
+      "url": "http://twilio-capability-service"
     },
     "match": {
-      "url": "http://capability.twilio/token",
+      "url": "http://voice.marius-cv.com/api/v1/organizations/${ORGANIZATION}/twilio/capability-token",
       "methods": [
         "GET"
       ]

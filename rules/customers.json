@@ -64,6 +64,39 @@
     }
   },
   {
+    "id": "${ORGANIZATION}-get-customer-by-phone-${ENVIROMENT}",
+    "description": "Get one customer by phone for organization: ${ORGANIZATION}",
+    "upstream": {
+      "url": "${RESOURCE_SERVER}"
+    },
+    "match": {
+      "url": "${OATHKEEPER_PROXY_URL}/api/v1/organizations/${ORGANIZATION}/customers/phone/<([a-zA-Z0-9_\\+]+)>",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "${ORGANIZATION}.customers"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "organizations:${ORGANIZATION}:customers:phone:$1:read",
+        "required_resource": "organizations:${ORGANIZATION}:customers:phone:$1"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  },
+  {
     "id": "${ORGANIZATION}-get-customers-${ENVIROMENT}",
     "description": "Get customers collection for organization: ${ORGANIZATION}",
     "upstream": {
