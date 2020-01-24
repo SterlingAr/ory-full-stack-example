@@ -10,8 +10,6 @@ networks:
 volumes:
   hydra_db:
     driver: local
-  oathkeeper_db:
-    driver: local
   keto_db:
     driver: local
   rules:
@@ -53,6 +51,8 @@ services:
       - ${DATA_PATH_HOST}/keto_db:/var/lib/postgresql/data
     networks:
       - ory_stack
+    ports:
+      - "5432:5432"
 
   hydra_migrate:
     image: oryd/hydra:${HYDRA_VERSION}
@@ -61,7 +61,7 @@ services:
       - hydra_postgres
     networks:
     - ory_stack
-    command: "migrate sql $HYDRA_DATABASE_URL"
+    command: "migrate sql --yes $HYDRA_DATABASE_URL"
     tty: false
 
   oathkeeper_migrate:
