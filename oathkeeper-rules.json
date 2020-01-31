@@ -1,0 +1,27 @@
+[
+  {
+    "id": "twilio-omni-rule",
+    "upstream": {
+      "url": "http://192.168.30.186:8086"
+    },
+    "match": {
+      "url": "http://127.0.0.1:4455/api/v1/organizations/roiup/capability",
+      "methods": ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"]
+    },
+    "authenticators": [{
+      "handler": "oauth2_introspection",
+      "config": {
+        "required_scope": [
+          "roiup.customers"
+        ]
+      }
+    }],
+    "authorizer": { "handler": "allow" },
+    "mutators": [
+      {
+        "handler": "header"
+      }
+    ],
+    "errors": [{ "handler": "json" }]
+  }
+]

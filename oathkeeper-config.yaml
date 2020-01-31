@@ -1,0 +1,108 @@
+#dsn: postgres://{{ .Data.PSQL_USERNAME }}:{{ .Data.PSQL_PASSWORD }}@{{ .Data.PSQL_HOST }}:{{ .Data.PSQL_HOST_PORT }}/{{.Data.PSQL_DB_NAME}}
+serve:
+  ### PostgreSQL (recommended)
+  #
+  # If dsn is starting with postgres:// PostgreSQL will be used as storage backend:
+    #
+  api:
+    port: 4456
+
+  proxy:
+    port: 4455
+
+    cors:
+      enabled: true
+      allowed_origins:
+        - '*'
+
+      allowed_methods:
+        - PATCH
+        - GET
+        - HEAD
+        - DELETE
+        - PUT
+        - POST
+      allowed_headers:
+        - Authorization
+        - Content-Type
+
+      debug: true
+## Access Rules ##
+#
+# Configure access rules. All sub-keys support configuration reloading without restarting.
+#
+access_rules:
+  ## Repositories ##
+  #
+  # Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:
+  #
+  # - If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.
+  # - If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)).
+  # - If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.
+  #
+  # Examples:
+  # - '["file://path/to/rules.json","inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d","https://path-to-my-rules/rules.json"]'
+  #
+  # Set this value using environment variables on
+  # - Linux/macOS:
+  #    $ export ACCESS_RULES_REPOSITORIES=<value>
+  # - Windows Command Line (CMD):
+  #    > set ACCESS_RULES_REPOSITORIES=<value>
+  #
+  repositories:
+    - file:///resources/oathkeeper-rules.json
+
+authenticators:
+  oauth2_introspection:
+    enabled: true
+    ## config ##
+    #
+    config:
+      ## introspection_url ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL=<value>
+      #
+      introspection_url: http://hydra:4445/oauth2/introspect
+
+authorizers:
+  allow:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
+  ## ORY Keto Access Control Policies Engine ##
+  #
+  # The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).
+  #
+  keto_engine_acp_ory:
+    enabled: true
+    config:
+      ## base_url ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHORIZERS_KETO_ENGINE_ACP_ORY_CONFIG_BASE_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHORIZERS_KETO_ENGINE_ACP_ORY_CONFIG_BASE_URL=<value>
+      #
+      base_url: http://keto:4466
+      required_action: placeholder
+      required_resource: placeholder
+
+mutators:
+  noop:
+    enabled: true
+  header:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
+    config:
+      headers:
+        X-Phone-Number: "{{ print .Extra.phone_number }}"
+  id_token:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
+    config:
+      issuer_url: http://oathkeeper-api:4456
+      jwks_url: file:///tokens/jwks.json

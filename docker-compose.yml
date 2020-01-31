@@ -28,18 +28,6 @@ services:
     networks:
       - ory_stack
 
-  oathkeeper_postgres:
-    image: postgres:${POSTGRES_VERSION}
-    container_name: oathkeeper-db
-    environment:
-      - POSTGRES_USER=${OATHKEEPER_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${OATHKEEPER_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${OATHKEEPER_POSTGRES_DB}
-    volumes:
-      - ${DATA_PATH_HOST}/oathkeeper_db:/var/lib/postgresql/data
-    networks:
-      - ory_stack
-
   keto_postgres:
     image: postgres:${POSTGRES_VERSION}
     container_name: keto-db
@@ -64,16 +52,6 @@ services:
     command: "migrate sql --yes $HYDRA_DATABASE_URL"
     tty: false
 
-  oathkeeper_migrate:
-    image: oryd/oathkeeper:${OATHKEEPER_VERSION}
-    container_name: oathkeeper-migrate
-    depends_on:
-      - oathkeeper_postgres
-    networks:
-      - ory_stack
-    command: "migrate sql $OATHKEEPER_DATABASE_URL"
-    tty: false
-
   keto_migrate:
     image: oryd/keto:${KETO_VERSION}
     container_name: keto-migrate
@@ -87,49 +65,21 @@ services:
   oathkeeper_api:
     image: oryd/oathkeeper:${OATHKEEPER_VERSION}
     container_name: oathkeeper-api
-    depends_on:
-      - oathkeeper_migrate
-      - keto
     environment:
-      - DATABASE_URL=${OATHKEEPER_DATABASE_URL}
-      - AUTHORIZER_KETO_URL=${AUTHORIZER_KETO_URL}
-      - PORT=4456
-      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=${AUTHENTICATOR_OAUTH2_INTROSPECTION_URL}
-      - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=${CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL}
-      - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=${CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM}
+      - HOST_IP=${HOST_IP}
+    depends_on:
+      - keto
     networks:
       - ory_stack
+    volumes:
+      - ./oathkeeper-config.yaml:/configuration/oathkeeper-config.yaml
+      - ./jwks.json:/tokens/jwks.json
+      - ./oathkeeper-rules.json:/resources/oathkeeper-rules.json
     entrypoint: oathkeeper
     ports:
       - "4456:4456"
-    command: "serve api"
-
-  oathkeeper_proxy:
-    image: oryd/oathkeeper:${OATHKEEPER_VERSION}
-    container_name: oathkeeper-proxy
-    depends_on:
-      - hydra
-      - oathkeeper_api
-    environment:
-      - OATHKEEPER_API_URL=http://oathkeeper-api:4456
-      - AUTHORIZER_KETO_URL=${AUTHORIZER_KETO_URL}
-      - PORT=4455
-      - AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=${AUTHENTICATOR_OAUTH2_INTROSPECTION_URL}
-      - CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=${CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL}
-      - CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM=${CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM}
-      - CORS_ENABLED=${CORS_ENABLED}
-      - CORS_DEBUG=${CORS_DEBUG}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - CORS_ALLOWED_METHODS=${CORS_ALLOWED_METHODS}
-      - CORS_ALLOWED_CREDENTIALS=${CORS_ALLOWED_CREDENTIALS}
-      - CORS_ALLOWED_HEADERS=${CORS_ALLOWED_HEADERS}
-    networks:
-      - ory_stack
-      - stack
-    ports:
       - "4455:4455"
-    entrypoint: oathkeeper
-    command: "serve proxy"
+    command: "--config /configuration/oathkeeper-config.yaml serve all"
 
   keto:
     image: oryd/keto:${KETO_VERSION}
@@ -171,25 +121,3 @@ services:
       - "9001:4445"
     entrypoint: hydra
     command: "serve all --dangerous-force-http"
-
-  ory-config-utils:
-    image: roiupagency/ory-config-utils
-    depends_on:
-      - oathkeeper_api
-    networks:
-      - ory_stack
-      - stack
-    environment:
-      - ENVIROMENT=dev
-      - ORGANIZATION=roiup
-      - OATHKEEPER_PROXY_URL=http://localhost:4455
-      - RESOURCE_SERVER=http://nginx
-    volumes:
-      - ${OATHKEEPER_RULES_PATH}:/rules
-    command: >
-      /bin/bash -c "rm -rf /rules-changed && mkdir rules-changed &&
-      cp -rf /rules/*.json /rules-changed &&
-      chmod +x envsubstfiles.sh &&
-      chmod +x oathkeeper.sh &&
-      /envsubstfiles.sh '/rules-changed/*.json' &&
-      /oathkeeper.sh 'http://oathkeeper-api:4456' '/rules-changed/'"
