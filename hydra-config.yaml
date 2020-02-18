@@ -1,0 +1,84 @@
+# log configures the logger
+log:
+  # Sets the log level, supports "panic", "fatal", "error", "warn", "info" and "debug". Defaults to "info".
+  level: info
+  # Sets the log format. Leave it undefined for text based log format, or set to "json" for JSON formatting.
+  format: json
+
+secrets:
+  # The system secret must be at least 16 characters long. If none is provided, one will be generated. They key
+  # is used to encrypt sensitive data using AES-GCM (256 bit) and validate HMAC signatures.
+  #
+  # The first item in the list is used for signing and encryption. The whole list is used for verifying signatures
+  # and decryption.
+  system:
+    - 123456789012345678901234567890
+
+serve:
+  # public controls the public daemon serving public API endpoints like /oauth2/auth, /oauth2/token, /.well-known/jwks.json
+  public:
+    # The port to listen on. Defaults to 4444
+    port: 4444
+    # The interface or unix socket ORY Hydra should listen and handle public API requests on.
+    # Use the prefix "unix:" to specify a path to a unix socket.
+    # Leave empty to listen on all interfaces.
+
+    cors:
+      # set enabled to true to enable CORS. Defaults to false.
+      enabled: true
+
+      # allowed_methods is list of HTTP methods the user agent is allowed to use with cross-domain
+      # requests. Defaults to GET and POST.
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+
+      # A list of non simple headers the client is allowed to use with cross-domain requests. Defaults to the listed values.
+      allowed_headers:
+        - Authorization
+        - Content-Type
+        - Accept
+        - Accept-Language
+        - Content-Language
+        - Content-Type
+
+      # Sets whether the request can include user credentials like cookies, HTTP authentication
+      # or client side SSL certificates.
+      allow_credentials: true
+
+      # If set to true, adds additional log output to debug server side CORS issues. Defaults to false.
+      debug: true
+
+  admin:
+    # The port to listen on. Defaults to 4445
+    port: 4445
+
+### PostgreSQL (recommended)
+#
+# If dsn is starting with postgres:// PostgreSQL will be used as storage backend:
+#dsn: postgres://{{ .Data.PSQL_USERNAME }}:{{ .Data.PSQL_PASSWORD }}@{{ .Data.PSQL_HOST }}:{{ .Data.PSQL_HOST_PORT }}/{{.Data.PSQL_DB_NAME}}
+dsn: postgres://user:password@hydra-db:5432/hydra?sslmode=disable
+
+#
+urls:
+  self:
+    # This value will be used as the "issuer" in access and ID tokens. It must be
+    # specified and using HTTPS protocol, unless --dangerous-force-http is set. This should typically be equal
+    # to the public value.
+    issuer: http://localhost:9000/
+
+  # Sets the login endpoint of the User Login & Consent flow. Defaults to an internal fallback URL.
+  login: /login
+  # Sets the consent endpoint of the User Login & Consent flow. Defaults to an internal fallback URL.
+  consent: /consent
+  # Sets the logout endpoint. Defaults to an internal fallback URL.
+  logout: /logout
+  # Sets the error endpoint. The error ui will be shown when an OAuth2 error occurs that which can not be sent back
+  # to the client. Defaults to an internal fallback URL.
+  error: /error
+  # When a user agent requests to logout, it will be redirected to this url afterwards per default.
+  post_logout_redirect: /see-ya

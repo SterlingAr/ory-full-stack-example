@@ -5,7 +5,8 @@ networks:
     driver: bridge
   stack:
     external:
-      name: daassuitedockerdevelopment_stack
+#      name: daassuitedockerdevelopment_stack
+      name: ${APPLICATION_NETWORK}
 
 volumes:
   hydra_db:
@@ -49,7 +50,10 @@ services:
       - hydra_postgres
     networks:
     - ory_stack
-    command: "migrate sql --yes $HYDRA_DATABASE_URL"
+    volumes:
+      - ./hydra-config.yaml:/configuration/hydra-config.yaml
+    entrypoint: hydra
+    command: "--config /configuration/hydra-config.yaml migrate sql --yes -e"
     tty: false
 
   keto_migrate:
@@ -59,7 +63,11 @@ services:
       - keto_postgres
     networks:
       - ory_stack
-    command: "migrate sql $KETO_DATABASE_URL"
+    volumes:
+      - ./keto-config.yaml:/configuration/keto-config.yaml
+#    command: "migrate sql $KETO_DATABASE_URL"
+    entrypoint: keto
+    command: "--config /configuration/keto-config.yaml migrate sql --yes -e"
     tty: false
 
   oathkeeper_api:
@@ -86,33 +94,36 @@ services:
     container_name: keto
     depends_on:
       - keto_migrate
-    environment:
-      - DATABASE_URL=${KETO_DATABASE_URL}
     networks:
       - ory_stack
       - stack
+    volumes:
+      - ./keto-config.yaml:/configuration/keto-config.yaml
     ports:
       - "4466:4466"
     entrypoint: keto
-    command: "serve"
+    command: "--config /configuration/keto-config.yaml serve all"
+#    command: "serve"
 
   hydra:
     image: oryd/hydra:${HYDRA_VERSION}
     container_name: hydra
     depends_on:
     - hydra_migrate
-    environment:
-      - DATABASE_URL=${HYDRA_DATABASE_URL}
-      - SYSTEM_SECRET=${SYSTEM_SECRET}
-      - OAUTH2_ISSUER_URL=${OAUTH2_ISSUER_URL}
-      - OAUTH2_CONSENT_URL=${OAUTH2_CONSENT_URL}
-      - OAUTH2_LOGIN_URL=${OAUTH2_LOGIN_URL}
-      - CORS_ENABLED=${CORS_ENABLED}
-      - CORS_DEBUG=${CORS_DEBUG}
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - CORS_ALLOWED_METHODS=${CORS_ALLOWED_METHODS}
-      - CORS_ALLOWED_CREDENTIALS=${CORS_ALLOWED_CREDENTIALS}
-      - CORS_ALLOWED_HEADERS=${CORS_ALLOWED_HEADERS}
+#    environment:
+#      - DATABASE_URL=${HYDRA_DATABASE_URL}
+#      - SYSTEM_SECRET=${SYSTEM_SECRET}
+#      - OAUTH2_ISSUER_URL=${OAUTH2_ISSUER_URL}
+#      - OAUTH2_CONSENT_URL=${OAUTH2_CONSENT_URL}
+#      - OAUTH2_LOGIN_URL=${OAUTH2_LOGIN_URL}
+#      - CORS_ENABLED=${CORS_ENABLED}
+#      - CORS_DEBUG=${CORS_DEBUG}
+#      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+#      - CORS_ALLOWED_METHODS=${CORS_ALLOWED_METHODS}
+#      - CORS_ALLOWED_CREDENTIALS=${CORS_ALLOWED_CREDENTIALS}
+#      - CORS_ALLOWED_HEADERS=${CORS_ALLOWED_HEADERS}
+    volumes:
+      - ./hydra-config.yaml:/configuration/hydra-config.yaml
     networks:
       - ory_stack
       - stack
@@ -120,4 +131,5 @@ services:
       - "9000:4444"
       - "9001:4445"
     entrypoint: hydra
-    command: "serve all --dangerous-force-http"
+#    command: "serve all --dangerous-force-http"
+    command: "--config /configuration/hydra-config.yaml serve all --dangerous-force-http"
