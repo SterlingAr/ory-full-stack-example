@@ -128,7 +128,7 @@ services:
       - ory_stack
       - stack
     ports:
-      - "9000:4444"
+      - "9003:4444"
       - "9001:4445"
     entrypoint: hydra
 #    command: "serve all --dangerous-force-http"

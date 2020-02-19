@@ -69,7 +69,7 @@ urls:
     # This value will be used as the "issuer" in access and ID tokens. It must be
     # specified and using HTTPS protocol, unless --dangerous-force-http is set. This should typically be equal
     # to the public value.
-    issuer: http://localhost:9000/
+    issuer: http://localhost:9003/
 
   # Sets the login endpoint of the User Login & Consent flow. Defaults to an internal fallback URL.
   login: /login
