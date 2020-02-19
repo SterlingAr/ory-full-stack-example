@@ -6,7 +6,9 @@
 
 This will launch Hydra, Keto and Oathkeeper with minimal configuration:
 
-
+    $ cp .env.dist .env
+    
+    
     $ docker-compose up -d
 
 
