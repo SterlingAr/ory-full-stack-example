@@ -1,0 +1,14 @@
+{
+  "id": "ADMIN",
+  "description": "Administrative account",
+  "subjects": [
+    "ADMIN"
+  ],
+  "effect": "allow",
+  "resources": [
+    "campaigns"
+  ],
+  "actions": [
+    "campaigns:read"
+  ]
+}

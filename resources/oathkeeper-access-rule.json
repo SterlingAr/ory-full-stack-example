@@ -1,0 +1,35 @@
+[
+  {
+    "id": "get-campaigns",
+    "description": "Get campaigns",
+    "upstream": {
+      "url": "http://nginx:5001"
+    },
+    "match": {
+      "url": "http://localhost:8000/api/v1/campaigns",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "campaigns"
+          ]
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_engine_acp_ory",
+      "config": {
+        "required_action": "campaigns:read",
+        "required_resource": "campaigns"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
+  }
+]

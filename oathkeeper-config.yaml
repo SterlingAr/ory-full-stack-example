@@ -50,7 +50,7 @@ access_rules:
   #    > set ACCESS_RULES_REPOSITORIES=<value>
   #
   repositories:
-    - file:///resources/oathkeeper-rules.json
+    - file:///resources/oathkeeper-access-rule.json
 
 authenticators:
   oauth2_introspection:

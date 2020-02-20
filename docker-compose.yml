@@ -80,7 +80,7 @@ services:
     volumes:
       - ./oathkeeper-config.yaml:/configuration/oathkeeper-config.yaml
       - ./jwks.json:/tokens/jwks.json
-      - ./oathkeeper-rules.json:/resources/oathkeeper-rules.json
+      - ./resources:/resources
     entrypoint: oathkeeper
     ports:
       - "4456:4456"
@@ -97,10 +97,11 @@ services:
       - stack
     volumes:
       - ./keto-config.yaml:/configuration/keto-config.yaml
+      - ./resources:/resources
     ports:
       - "4466:4466"
     entrypoint: keto
-    command: "--config /configuration/keto-config.yaml serve all"
+    command: "keto --config /configuration/keto-config.yaml serve all"
 
   hydra:
     image: oryd/hydra:${HYDRA_VERSION}
