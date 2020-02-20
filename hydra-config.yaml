@@ -72,13 +72,13 @@ urls:
     issuer: http://localhost:9003/
 
   # Sets the login endpoint of the User Login & Consent flow. Defaults to an internal fallback URL.
-  login: /login
+  login: http://localhost:8000/login
   # Sets the consent endpoint of the User Login & Consent flow. Defaults to an internal fallback URL.
-  consent: /consent
+  consent: http://localhost:8000/consent
   # Sets the logout endpoint. Defaults to an internal fallback URL.
-  logout: /logout
+  logout: http://localhost:8000/logout
   # Sets the error endpoint. The error ui will be shown when an OAuth2 error occurs that which can not be sent back
   # to the client. Defaults to an internal fallback URL.
-  error: /error
+  error: http://localhost:8000/error
   # When a user agent requests to logout, it will be redirected to this url afterwards per default.
   post_logout_redirect: /see-ya
