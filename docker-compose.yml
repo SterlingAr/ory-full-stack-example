@@ -6,6 +6,7 @@ networks:
   stack:
     external:
       name: ${APPLICATION_NETWORK}
+#      name: daassuitedockerdevelopment_stack
 
 volumes:
   hydra_db:
@@ -65,7 +66,7 @@ services:
     volumes:
       - ./keto-config.yaml:/configuration/keto-config.yaml
     entrypoint: keto
-    command: "--config /configuration/keto-config.yaml migrate sql --yes -e"
+    command: " --config /configuration/keto-config.yaml migrate sql -e"
     tty: false
 
   oathkeeper_api:
@@ -77,10 +78,11 @@ services:
       - keto
     networks:
       - ory_stack
+      - stack
     volumes:
       - ./oathkeeper-config.yaml:/configuration/oathkeeper-config.yaml
       - ./jwks.json:/tokens/jwks.json
-      - ./resources:/resources
+      - ./resources/:/resources/
     entrypoint: oathkeeper
     ports:
       - "4456:4456"
@@ -97,11 +99,10 @@ services:
       - stack
     volumes:
       - ./keto-config.yaml:/configuration/keto-config.yaml
-      - ./resources:/resources
     ports:
       - "4466:4466"
     entrypoint: keto
-    command: "keto --config /configuration/keto-config.yaml serve all"
+    command: "--config /configuration/keto-config.yaml serve all"
 
   hydra:
     image: oryd/hydra:${HYDRA_VERSION}

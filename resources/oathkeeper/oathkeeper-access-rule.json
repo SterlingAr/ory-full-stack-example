@@ -6,7 +6,7 @@
       "url": "http://nginx:5001"
     },
     "match": {
-      "url": "http://localhost:8000/api/v1/campaigns",
+      "url": "http://localhost:4455/api/v1/campaigns",
       "methods": [
         "GET"
       ]
@@ -28,8 +28,13 @@
         "required_resource": "campaigns"
       }
     },
-    "credentials_issuer": {
-      "handler": "id_token"
-    }
+    "mutators": [
+      {
+        "handler": "id_token",
+        "config": {
+          "claims": "{\"subject\": \"{{ print .Subject }}\"}"
+        }
+      }
+    ]
   }
 ]

@@ -1,0 +1,8 @@
+{
+  "client_id": "postman-roiup",
+  "client_secret": "123456",
+  "grant_types": [
+    "client_credentials"
+  ],
+  "scope": "offline offline_access openid profile campaigns users"
+}
