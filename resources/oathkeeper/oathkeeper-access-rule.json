@@ -1,12 +1,12 @@
 [
   {
-    "id": "get-campaigns",
-    "description": "Get campaigns",
+    "id": "get-users",
+    "description": "Get users",
     "upstream": {
-      "url": "http://nginx:5001"
+      "url": "http://openid-php-app:8000"
     },
     "match": {
-      "url": "http://localhost:4455/api/v1/campaigns",
+      "url": "http://localhost:4455/api/v1/users",
       "methods": [
         "GET"
       ]
@@ -16,7 +16,7 @@
         "handler": "oauth2_introspection",
         "config": {
           "required_scope": [
-            "campaigns"
+            "users"
           ]
         }
       }
@@ -24,8 +24,8 @@
     "authorizer": {
       "handler": "keto_engine_acp_ory",
       "config": {
-        "required_action": "campaigns:read",
-        "required_resource": "campaigns"
+        "required_action": "users:read",
+        "required_resource": "users"
       }
     },
     "mutators": [

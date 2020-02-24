@@ -1,6 +1,5 @@
 {
   "client_id": "webapp",
-  "owner": "roiup",
   "redirect_uris": [
     "http://localhost:8080"
   ],

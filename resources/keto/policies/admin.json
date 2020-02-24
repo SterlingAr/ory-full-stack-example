@@ -1,4 +1,4 @@
-{
+[{
   "id": "ADMIN",
   "description": "Administrative account",
   "subjects": [
@@ -11,4 +11,4 @@
   "actions": [
     "users:read"
   ]
-}
+}]

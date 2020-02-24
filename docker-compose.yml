@@ -39,6 +39,9 @@ services:
     ports:
       - "5432:5432"
 
+  #######################################
+  ############## HYDRA ##################
+  #######################################
   hydra_migrate:
     image: oryd/hydra:${HYDRA_VERSION}
     container_name: hydra-migrate-v1
@@ -52,6 +55,38 @@ services:
     command: "--config /configuration/hydra-config.yaml migrate sql --yes -e"
     tty: false
 
+  hydra:
+    image: oryd/hydra:${HYDRA_VERSION}
+    container_name: hydra
+    depends_on:
+      - hydra_migrate
+    volumes:
+      - ./config/hydra-config.yaml:/configuration/hydra-config.yaml
+    networks:
+      - intranet
+    ports:
+      - "9003:4444"
+      - "9001:4445"
+    entrypoint: hydra
+    command: "--config /configuration/hydra-config.yaml serve all --dangerous-force-http"
+
+  hydra_clients:
+    image: oryd/hydra:${HYDRA_VERSION}
+    container_name: hydra-clients
+    depends_on:
+      - hydra
+    volumes:
+      - ./config/hydra-config.yaml:/configuration/hydra-config.yaml
+      - ./resources/hydra/clients:/resources/
+    networks:
+      - intranet
+    entrypoint: hydra
+    command: "--config /configuration/hydra-config.yaml clients import /resources/postman.json /resources/webapp.json --endpoint 'http://hydra:4445'"
+
+
+  #######################################
+  ############## KETO ###################
+  #######################################
   keto_migrate:
     image: oryd/keto:${KETO_VERSION}
     container_name: keto-migrate
@@ -65,6 +100,52 @@ services:
     command: " --config /configuration/keto-config.yaml migrate sql -e"
     tty: false
 
+  keto:
+    image: oryd/keto:${KETO_VERSION}
+    container_name: keto
+    depends_on:
+      - keto_migrate
+    networks:
+      - intranet
+    volumes:
+      - ./config/keto-config.yaml:/configuration/keto-config.yaml
+    ports:
+      - "4466:4466"
+    entrypoint: keto
+    command: "--config /configuration/keto-config.yaml serve all"
+
+  keto_policies:
+    image: oryd/keto:${KETO_VERSION}
+    container_name: keto-policies
+    depends_on:
+      - keto
+    networks:
+      - intranet
+    volumes:
+      - ./config/keto-config.yaml:/configuration/keto-config.yaml
+      - ./resources/keto/policies:/resources/
+    entrypoint: keto
+    command: " --config /configuration/keto-config.yaml engines acp ory policies import regex /resources/admin.json --endpoint 'http://keto:4466'"
+    tty: false
+
+  keto_roles:
+    image: oryd/keto:${KETO_VERSION}
+    container_name: keto-roles
+    depends_on:
+      - keto
+    networks:
+      - intranet
+    volumes:
+      - ./config/keto-config.yaml:/configuration/keto-config.yaml
+      - ./resources/keto/roles:/resources/
+    entrypoint: keto
+    command: " --config /configuration/keto-config.yaml engines acp ory roles import regex /resources/admin.json --endpoint 'http://keto:4466'"
+    tty: false
+
+
+  #######################################
+  ############## OATHKEEPER #############
+  #######################################
   oathkeeper:
     image: oryd/oathkeeper:${OATHKEEPER_VERSION}
     container_name: oathkeeper
@@ -82,31 +163,22 @@ services:
       - "4455:4455"
     command: "--config /configuration/oathkeeper-config.yaml serve all"
 
-  keto:
-    image: oryd/keto:${KETO_VERSION}
-    container_name: keto
-    depends_on:
-      - keto_migrate
+  php_app:
+    container_name: openid-php-app
+    build:
+      context: ./php
     networks:
       - intranet
-    volumes:
-      - ./config/keto-config.yaml:/configuration/keto-config.yaml
+    command: "./symfony server:start"
     ports:
-      - "4466:4466"
-    entrypoint: keto
-    command: "--config /configuration/keto-config.yaml serve all"
+      - "8000:8000"
 
-  hydra:
-    image: oryd/hydra:${HYDRA_VERSION}
-    container_name: hydra
-    depends_on:
-    - hydra_migrate
-    volumes:
-      - ./config/hydra-config.yaml:/configuration/hydra-config.yaml
-    networks:
-      - intranet
-    ports:
-      - "9003:4444"
-      - "9001:4445"
-    entrypoint: hydra
-    command: "--config /configuration/hydra-config.yaml serve all --dangerous-force-http"
+  js_app:
+   container_name: openid-js-app
+   build:
+     context: ./node
+   networks:
+     - intranet
+   command: "yarn run serve"
+   ports:
+     - "8080:8080"

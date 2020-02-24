@@ -4,5 +4,5 @@
   "grant_types": [
     "client_credentials"
   ],
-  "scope": "offline offline_access openid profile campaigns users"
+  "scope": "offline offline_access openid profile users"
 }

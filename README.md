@@ -1,20 +1,18 @@
+##About
+
+Sample login, consent, logout flow with: ** VueJs + AppAuth, PHP+Symfony**
 
 ## Local install 
+
+Make sure the following ports are available on  the host: **9003, 9001, 4466, 4456, 4455, 8000, 8080**
 
 Launch containers:
 
 
-
-
-    $ cp .env.dist .env
+    ➜  cp .env.dist .env
     
+    ➜  docker-compose up -d
     
-    $ docker-compose up -d
-    
-   
 
 
-Create the Hydra, Oathkeeper and Keto resources in  **resources/**
-
-
-         
+Go to **http://localhost:8080**
