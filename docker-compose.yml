@@ -1,12 +1,8 @@
 version: '3'
 
 networks:
-  ory_stack:
+  intranet:
     driver: bridge
-  stack:
-    external:
-      name: ${APPLICATION_NETWORK}
-#      name: daassuitedockerdevelopment_stack
 
 volumes:
   hydra_db:
@@ -27,7 +23,7 @@ services:
     volumes:
     - ${DATA_PATH_HOST}/hydra_db:/var/lib/postgresql/data
     networks:
-      - ory_stack
+      - intranet
 
   keto_postgres:
     image: postgres:${POSTGRES_VERSION}
@@ -39,7 +35,7 @@ services:
     volumes:
       - ${DATA_PATH_HOST}/keto_db:/var/lib/postgresql/data
     networks:
-      - ory_stack
+      - intranet
     ports:
       - "5432:5432"
 
@@ -49,9 +45,9 @@ services:
     depends_on:
       - hydra_postgres
     networks:
-    - ory_stack
+    - intranet
     volumes:
-      - ./hydra-config.yaml:/configuration/hydra-config.yaml
+      - ./config/hydra-config.yaml:/configuration/hydra-config.yaml
     entrypoint: hydra
     command: "--config /configuration/hydra-config.yaml migrate sql --yes -e"
     tty: false
@@ -62,25 +58,22 @@ services:
     depends_on:
       - keto_postgres
     networks:
-      - ory_stack
+      - intranet
     volumes:
-      - ./keto-config.yaml:/configuration/keto-config.yaml
+      - ./config/keto-config.yaml:/configuration/keto-config.yaml
     entrypoint: keto
     command: " --config /configuration/keto-config.yaml migrate sql -e"
     tty: false
 
-  oathkeeper_api:
+  oathkeeper:
     image: oryd/oathkeeper:${OATHKEEPER_VERSION}
-    container_name: oathkeeper-api
-    environment:
-      - HOST_IP=${HOST_IP}
+    container_name: oathkeeper
     depends_on:
       - keto
     networks:
-      - ory_stack
-      - stack
+      - intranet
     volumes:
-      - ./oathkeeper-config.yaml:/configuration/oathkeeper-config.yaml
+      - ./config/oathkeeper-config.yaml:/configuration/oathkeeper-config.yaml
       - ./jwks.json:/tokens/jwks.json
       - ./resources/:/resources/
     entrypoint: oathkeeper
@@ -95,10 +88,9 @@ services:
     depends_on:
       - keto_migrate
     networks:
-      - ory_stack
-      - stack
+      - intranet
     volumes:
-      - ./keto-config.yaml:/configuration/keto-config.yaml
+      - ./config/keto-config.yaml:/configuration/keto-config.yaml
     ports:
       - "4466:4466"
     entrypoint: keto
@@ -110,10 +102,9 @@ services:
     depends_on:
     - hydra_migrate
     volumes:
-      - ./hydra-config.yaml:/configuration/hydra-config.yaml
+      - ./config/hydra-config.yaml:/configuration/hydra-config.yaml
     networks:
-      - ory_stack
-      - stack
+      - intranet
     ports:
       - "9003:4444"
       - "9001:4445"
