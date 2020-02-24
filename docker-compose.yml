@@ -74,7 +74,7 @@ services:
       - intranet
     volumes:
       - ./config/oathkeeper-config.yaml:/configuration/oathkeeper-config.yaml
-      - ./jwks.json:/tokens/jwks.json
+      - ./config/jwks.json:/tokens/jwks.json
       - ./resources/:/resources/
     entrypoint: oathkeeper
     ports:

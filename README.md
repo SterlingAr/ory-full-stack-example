@@ -1,9 +1,11 @@
 
 ## Local install 
 
--  Launch containers:
+Launch containers:
 
-    
+
+
+
     $ cp .env.dist .env
     
     
@@ -11,7 +13,8 @@
     
    
 
--  Create the Hydra, Oathkeeper and Keto resources in  **resources/**
+
+Create the Hydra, Oathkeeper and Keto resources in  **resources/**
 
 
          

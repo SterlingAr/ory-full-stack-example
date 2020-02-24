@@ -15,6 +15,6 @@
     "code",
     "id_token"
   ],
-  "scope": "offline offline_access openid profile users campaigns",
+  "scope": "offline offline_access openid profile users",
   "token_endpoint_auth_method": "none"
 }

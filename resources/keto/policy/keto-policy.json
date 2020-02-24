@@ -6,9 +6,9 @@
   ],
   "effect": "allow",
   "resources": [
-    "campaigns"
+    "users"
   ],
   "actions": [
-    "campaigns:read"
+    "users:read"
   ]
 }
