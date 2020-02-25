@@ -69,7 +69,6 @@ services:
     entrypoint: hydra
     command: "--config /configuration/hydra-config.yaml clients import /resources/postman.json /resources/webapp.json --endpoint 'http://hydra:4445'"
 
-
   #######################################
   ############## KETO ###################
   #######################################
