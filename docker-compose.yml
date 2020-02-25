@@ -13,6 +13,9 @@ volumes:
     driver: local
 
 services:
+  #######################################
+  ############## HYDRA ##################
+  #######################################
   hydra_postgres:
     image: postgres:${POSTGRES_VERSION}
     container_name: hydra-db
@@ -21,27 +24,10 @@ services:
       - POSTGRES_PASSWORD=${HYDRA_POSTGRES_PASSWORD}
       - POSTGRES_DB=${HYDRA_POSTGRES_DB}
     volumes:
-    - ${DATA_PATH_HOST}/hydra_db:/var/lib/postgresql/data
+      - ${DATA_PATH_HOST}/hydra_db:/var/lib/postgresql/data
     networks:
       - intranet
 
-  keto_postgres:
-    image: postgres:${POSTGRES_VERSION}
-    container_name: keto-db
-    environment:
-      - POSTGRES_USER=${KETO_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${KETO_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${KETO_POSTGRES_DB}
-    volumes:
-      - ${DATA_PATH_HOST}/keto_db:/var/lib/postgresql/data
-    networks:
-      - intranet
-    ports:
-      - "5432:5432"
-
-  #######################################
-  ############## HYDRA ##################
-  #######################################
   hydra_migrate:
     image: oryd/hydra:${HYDRA_VERSION}
     container_name: hydra-migrate-v1
@@ -87,6 +73,20 @@ services:
   #######################################
   ############## KETO ###################
   #######################################
+  keto_postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: keto-db
+    environment:
+      - POSTGRES_USER=${KETO_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${KETO_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${KETO_POSTGRES_DB}
+    volumes:
+      - ${DATA_PATH_HOST}/keto_db:/var/lib/postgresql/data
+    networks:
+      - intranet
+    ports:
+      - "5432:5432"
+
   keto_migrate:
     image: oryd/keto:${KETO_VERSION}
     container_name: keto-migrate
@@ -142,7 +142,6 @@ services:
     command: " --config /configuration/keto-config.yaml engines acp ory roles import regex /resources/admin.json --endpoint 'http://keto:4466'"
     tty: false
 
-
   #######################################
   ############## OATHKEEPER #############
   #######################################
@@ -163,6 +162,9 @@ services:
       - "4455:4455"
     command: "--config /configuration/oathkeeper-config.yaml serve all"
 
+  #######################################
+  ############# SAMPLE APPS #############
+  #######################################
   php_app:
     container_name: openid-php-app
     build:

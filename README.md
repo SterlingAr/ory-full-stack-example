@@ -1,6 +1,14 @@
-##About
+
+## About
 
 Sample login, consent, logout flow with: ** VueJs + AppAuth, PHP+Symfony**
+
+Example apps used: 
+
+[VueJs app](https://github.com/SterlingAr/openid-vuejs-client)
+
+[PHP app](https://github.com/SterlingAr/openid-user-manager)
+
 
 ## Local install 
 
