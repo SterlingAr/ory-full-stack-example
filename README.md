@@ -1,7 +1,6 @@
-
 ## About
 
-Sample login, consent, logout flow with: ** VueJs + AppAuth, PHP+Symfony**
+Sample login, consent, logout flow with: **VueJs + AppAuth, PHP+Symfony**
 
 Example apps used: 
 
